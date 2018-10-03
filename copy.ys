@@ -1,58 +1,50 @@
-#Initialization
-	irmovq len, %ebx 	#load len in rax
-	irmovq dest, %ebx 	#load dest in rax
-	irmovq src, %ebx 	#load src in rax
-	call copy_block 	#call the copyblock function
-	halt 
+#Author : Valentin Chomel
+
+#  00   /* copy_block - Copy src to dest and return xor checksum of src */
+#  03   result = 0;
+#  04   while (len > 0) {
+#  05       int val = *src++;
+#  06       *dest++ = val;
+#  07       result ^= val;
+#  08       len--;
+#  09   }
+
+	irmovq $0, %rdi		#Store src in rdi
+	mrmovq len, %rdx	#Store len in rdx
+	xorq %rax,%rax          # result = 0;
+	andq %rdx,%rdx          # len <= 0?
+	jle Done                # if so, goto Done:
  
+Loop:   mrmovq src(%rdi), %r10     # read val from src...
+	rmmovq %r10, dest(%rdi)    # ...and store it to dest
+	irmovq $8, %r10
+	addq %r10, %rdi         # rdi++
 
-copy_block: 
-        mrmovq dest, %rax 		#load dest in rax
-	pushl %ebp		# Save %ebp 
-	rrmovq %esp,%ebp	# Set Frame ptr 
-	xor %esi,%esi		# result = 0 
-	mrmovq 8(%ebp),%ebx	# get src 
-	mrmovq 12(%ebp),%ecx	# get dest 
-	mrmovq 16(%ebp),%edx	# get len 
-	and %edx,%edx		# len : 0? 
-	jle Loop		# jump to Loop if <= 0 
+	andq %rdx, %rdx         # len > 0?
+	xorq %r10, %rax
+	irmovq $1, %r10
+	subq %r10, %rdx         # len--
+	jg Loop                 # if so, goto Loop:
 
-
-
-Loop:			
-	mrmovq (%ebx),%eax	# val = *src 
-	irmovq $1,%edi 
-	subq %edi,%edx		# len-- 
-	rmmovq %eax,(%ecx)	# *dest = val 
-	irmovq $4,%edi 
-	addq %edi,%ebx		# src++ 
-	addq %edi,%ecx		# dest++ 
-	xor %eax,%esi		# result ^= val 
-	andl %edx,%edx		# len : 0? 
-	jg Done			# >, goto Loop 
+Done:
+        halt
 
 
-Done:			 
-	rrmovl %esi,%eax	# set return value 
-	rrmovl %ebp,%esp	# remove frame 
-	popl %ebp		# Restore %ebp 
-	ret			# Return 
- 
-.pos 0x256
-.align 8
-# Source block
-src:
-        .quad 0x00a
-        .quad 0x0b0
-        .quad 0xc00
-
-# Destination block
-dest:
-        .quad 0x111
-        .quad 0x222
-        .quad 0x333
-
-# Length
-len:
-        .quad 0x3
+#.pos 1024
+## Source block
+#src:
+#        .quad 0x00a
+#        .quad 0x0b0
+#        .quad 0xc00
+#
+## Destination block
+#.pos 2048
+#dest:
+#        .quad 0x111
+#        .quad 0x222
+#        .quad 0x333
+#
+## Length
+#len:
+#        .quad 0x3
 

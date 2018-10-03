@@ -1,17 +1,19 @@
-  mrmovq x, %rax 		#load x in rax
-  mrmovq x, %rdx 		#load x in rcx
-  irmovq $5, %rbx		#load 5 in rbx
-  subq   %rbx, %rax 		#do x-5
-  jg     Ltrue			#if x-5>0 jump Ltrue
-  mrmovq x, %rax		#executed if false
-  jmp 	 Lend
-Ltrue:
-  irmovq $1, %rcx		#executed if true
-  addq %rcx, %rdx		#x+1
-Lend:
-  rmmovq %rdx, y		#Store result in y
-  halt 
+#Author : Valentin Chomel
 
-.pos 256
-x: .quad 0x0c			# NOTE : x is not a variable but a memory location; x initialised to 13
-y: .quad 0x00			# y initialised to 0
+	mrmovq x, %rax 		#load x in rax
+	mrmovq x, %rdx 		#load x in rcx
+	irmovq $5, %rbx		#load 5 in rbx
+	subq   %rbx, %rax 	#do x-5
+	jg     Ltrue		#if x-5>0 jump Ltrue
+	mrmovq x, %rax		#executed if false
+	jmp 	 Lend
+Ltrue:
+	irmovq $1, %rcx		#executed if true
+	addq %rcx, %rdx		#x+1
+Lend:
+	rmmovq %rdx, y		#Store result in y
+	halt 
+
+#.pos 256
+#x: .quad 0x0c			# NOTE : x is not a variable but a memory location; x initialised to 13
+#y: .quad 0x00			# y initialised to 0
